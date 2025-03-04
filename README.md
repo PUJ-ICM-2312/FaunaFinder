@@ -1,2 +1,2 @@
 # FaunaFinder
-FAUNAFINDER - Los Foráneos
+FAUNAFINDER - Foráneos ING - Equipo 4
