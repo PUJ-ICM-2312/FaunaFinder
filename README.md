@@ -1,2 +1,2 @@
 # FaunaFinder
-FAUNAFINDER - Equipo 4
+FAUNAFINDER - Los Foráneos
