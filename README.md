@@ -1,2 +1,3 @@
-#Rama master 
-##Esta rama se utiliza para el proyecto
+Rama master 
+---
+Esta rama se utiliza para el proyecto, actualizaciones y mas...
