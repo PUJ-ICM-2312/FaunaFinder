@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "60517567858",
+    "project_id": "faunafinder-4cdc7",
+    "storage_bucket": "faunafinder-4cdc7.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:60517567858:android:577ccbbe209587621661eb",
+        "android_client_info": {
+          "package_name": "com.example.faunafinder"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyALqefopby0B2qE3Ob7skppcklpqr7A5rw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
