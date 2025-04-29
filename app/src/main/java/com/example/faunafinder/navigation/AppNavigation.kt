@@ -25,6 +25,6 @@ fun AppNavigation() {
         composable(Screen.Home.route) { HomeScreen(navController) }
         composable(Screen.Login.route) { LoginScreen(navController) }
         composable(Screen.Register.route) { RegisterScreen(navController) }
-        composable(Screen.Feed.route) { FeedScreen() }
+        composable(Screen.Feed.route) { FeedScreen(navController) }
     }
 }
