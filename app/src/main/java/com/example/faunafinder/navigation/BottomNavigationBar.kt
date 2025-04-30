@@ -8,15 +8,16 @@ import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
+import androidx.navigation.NavController
 
 @Composable
-fun BottomNavigationBar() {
+fun BottomNavigationBar(navController: NavController) {
     NavigationBar(
         containerColor = Color.White
     ) {
         NavigationBarItem(
-            selected = true,
-            onClick = { /* Navegar a Home */ },
+            selected = false,
+            onClick = { navController.navigate(Screen.Feed.route) },
             icon = {
                 Icon(
                     imageVector = Icons.Filled.Home,
@@ -27,33 +28,33 @@ fun BottomNavigationBar() {
         )
         NavigationBarItem(
             selected = false,
-            onClick = { /* Navegar a Agregar Post */ },
+            onClick = { navController.navigate(Screen.CreatePost.route) }, // 👈 ¡Aquí va el +!
             icon = {
                 Icon(
                     imageVector = Icons.Filled.Add,
-                    contentDescription = "Add Post",
+                    contentDescription = "Crear publicación",
                     tint = Color(0xFFFCB900)
                 )
             }
         )
         NavigationBarItem(
             selected = false,
-            onClick = { /* Navegar a Notificaciones */ },
+            onClick = { /* Notificaciones */ },
             icon = {
                 Icon(
                     imageVector = Icons.Filled.Notifications,
-                    contentDescription = "Notifications",
+                    contentDescription = "Notificaciones",
                     tint = Color(0xFFFCB900)
                 )
             }
         )
         NavigationBarItem(
             selected = false,
-            onClick = { /* Navegar a Perfil */ },
+            onClick = { /* Perfil */ },
             icon = {
                 Icon(
                     imageVector = Icons.Filled.Person,
-                    contentDescription = "Profile",
+                    contentDescription = "Perfil",
                     tint = Color(0xFFFCB900)
                 )
             }

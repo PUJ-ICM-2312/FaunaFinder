@@ -81,6 +81,7 @@ dependencies {
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
     implementation(libs.firebase.firestore.ktx)
+    implementation(libs.play.services.location)
 
     // Test
     testImplementation(libs.junit)
