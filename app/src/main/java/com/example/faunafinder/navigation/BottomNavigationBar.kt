@@ -39,7 +39,7 @@ fun BottomNavigationBar(navController: NavController) {
         )
         NavigationBarItem(
             selected = false,
-            onClick = { /* Notificaciones */ },
+            onClick = { navController.navigate(Screen.Notifications.route) },
             icon = {
                 Icon(
                     imageVector = Icons.Filled.Notifications,

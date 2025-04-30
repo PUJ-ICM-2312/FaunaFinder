@@ -5,6 +5,7 @@ import androidx.navigation.NavHost
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.example.faunafinder.ui.feed.NotificationsScreen
 import com.example.faunafinder.ui.perfil.PerfilScreen
 import com.example.faunafinder.ui.screens.HomeScreen
 import com.example.faunafinder.ui.screens.LoginScreen
@@ -19,6 +20,8 @@ sealed class Screen(val route: String) {
     object Feed : Screen("feed")
     object CreatePost : Screen("create_post")
     object Perfil : Screen("perfil")
+    object Notifications : Screen("notifications")
+
 }
 
 @Composable
@@ -32,5 +35,6 @@ fun AppNavigation() {
         composable(Screen.Feed.route) { FeedScreen(navController) }
         composable(Screen.CreatePost.route) { CreatePostScreen(navController) }
         composable(Screen.Perfil.route) { PerfilScreen(navController) }
+        composable(Screen.Notifications.route) { NotificationsScreen()}
     }
 }
