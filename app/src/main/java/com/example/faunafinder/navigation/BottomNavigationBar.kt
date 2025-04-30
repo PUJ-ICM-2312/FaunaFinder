@@ -50,7 +50,7 @@ fun BottomNavigationBar(navController: NavController) {
         )
         NavigationBarItem(
             selected = false,
-            onClick = { /* Perfil */ },
+            onClick = { navController.navigate(Screen.Perfil.route)},
             icon = {
                 Icon(
                     imageVector = Icons.Filled.Person,

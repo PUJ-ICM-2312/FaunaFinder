@@ -82,6 +82,7 @@ dependencies {
     implementation(libs.androidx.material3)
     implementation(libs.firebase.firestore.ktx)
     implementation(libs.play.services.location)
+    implementation(libs.firebase.database.ktx)
 
     // Test
     testImplementation(libs.junit)
