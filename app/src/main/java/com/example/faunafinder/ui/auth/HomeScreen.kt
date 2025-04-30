@@ -1,4 +1,4 @@
-package com.example.faunafinder.ui.screens
+package com.example.faunafinder.ui.auth
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
