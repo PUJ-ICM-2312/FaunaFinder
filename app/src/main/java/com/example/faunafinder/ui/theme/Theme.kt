@@ -12,15 +12,24 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
 
 private val DarkColorScheme = darkColorScheme(
-    primary = Purple80,
-    secondary = PurpleGrey80,
-    tertiary = Pink80
+    primary = CafeOscuro,           // Color principal (botones, etc.)
+    onPrimary = BlancoSuave,        // Texto sobre primario
+    secondary = VerdeMenosOscuro,   // Botones secundarios
+    onSecondary = BlancoSuave,      // Texto sobre secundarios
+    background = VerdeOscuro,       // Fondo de pantalla
+    onBackground = BlancoSuave,     // Texto sobre fondo
+    surface = Menta,                // Tarjetas, campos de texto, etc.
+    onSurface = Carbon,        // Texto sobre surface
 )
 
 private val LightColorScheme = lightColorScheme(
-    primary = Purple40,
-    secondary = PurpleGrey40,
-    tertiary = Pink40
+    primary = VerdeLima,         // Botones
+    onPrimary = Negro,           // Texto en botones
+    background = VerdeMentaClaro,// Fondo de pantalla
+    onBackground = Negro,        // Texto sobre fondo
+    surface = Blanco,            // Campos de texto
+    onSurface = Negro,           // Texto dentro de campos
+    secondary = CafeClaro        // Íconos o detalles
 
     /* Other default colors to override
     background = Color(0xFFFFFBFE),
@@ -37,7 +46,7 @@ private val LightColorScheme = lightColorScheme(
 fun FaunaFInderTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
     // Dynamic color is available on Android 12+
-    dynamicColor: Boolean = true,
+    dynamicColor: Boolean = false,
     content: @Composable () -> Unit
 ) {
     val colorScheme = when {
