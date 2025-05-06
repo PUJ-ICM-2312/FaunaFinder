@@ -1,6 +1,5 @@
 package com.example.faunafinder.ui.screens
 
-
 import android.content.Intent
 import android.net.Uri
 import androidx.compose.foundation.Image
