@@ -6,5 +6,5 @@ data class Post(
     val username: String,
     val profileColor: Color,
     val question: String,
-    val imageRes: Int // ID de drawable
+    val imageRes: Int
 )
