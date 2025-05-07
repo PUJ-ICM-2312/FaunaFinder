@@ -22,6 +22,7 @@ import com.google.firebase.firestore.FirebaseFirestore
 @Composable
 fun RegisterScreen(navController: NavController) {
     val context = LocalContext.current
+    var name by remember { mutableStateOf("") } // ← nuevo campo
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var isLoading by remember { mutableStateOf(false) }
@@ -44,6 +45,16 @@ fun RegisterScreen(navController: NavController) {
         Spacer(modifier = Modifier.height(20.dp))
 
         OutlinedTextField(
+            value = name,
+            onValueChange = { name = it },
+            label = { Text("Nombre completo") },
+            singleLine = true,
+            modifier = Modifier.fillMaxWidth()
+        )
+
+        Spacer(modifier = Modifier.height(10.dp))
+
+        OutlinedTextField(
             value = email,
             onValueChange = { email = it },
             label = { Text("Correo") },
@@ -59,10 +70,8 @@ fun RegisterScreen(navController: NavController) {
             visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
             trailingIcon = {
                 val icon = if (passwordVisible) Icons.Filled.VisibilityOff else Icons.Filled.Visibility
-                val description = if (passwordVisible) "Mostrar/Ocultar contraseña" else "Mostrar/Ocultar contraseña"
-
                 IconButton(onClick = { passwordVisible = !passwordVisible }) {
-                    Icon(imageVector = icon, contentDescription = description)
+                    Icon(imageVector = icon, contentDescription = null)
                 }
             },
             modifier = Modifier.fillMaxWidth()
@@ -72,7 +81,7 @@ fun RegisterScreen(navController: NavController) {
 
         Button(
             onClick = {
-                if (email.isBlank() || password.isBlank()) {
+                if (name.isBlank() || email.isBlank() || password.isBlank()) {
                     errorMessage = "Todos los campos son obligatorios"
                     return@Button
                 }
@@ -86,6 +95,7 @@ fun RegisterScreen(navController: NavController) {
                             val user = auth.currentUser
                             user?.let {
                                 val userData = hashMapOf(
+                                    "name" to name.trim(),
                                     "email" to it.email,
                                     "uid" to it.uid
                                 )

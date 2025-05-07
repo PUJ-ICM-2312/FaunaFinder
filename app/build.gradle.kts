@@ -83,6 +83,7 @@ dependencies {
     implementation(libs.firebase.firestore.ktx)
     implementation(libs.play.services.location)
     implementation(libs.firebase.database.ktx)
+    implementation(libs.firebase.storage)
 
     // Test
     testImplementation(libs.junit)

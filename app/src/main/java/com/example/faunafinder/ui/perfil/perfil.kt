@@ -1,7 +1,13 @@
 package com.example.faunafinder.ui.perfil
 
+
+import android.net.Uri
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Edit
@@ -9,10 +15,14 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import coil.compose.rememberImagePainter
+import com.example.faunafinder.R
 import com.example.faunafinder.navigation.BottomNavigationBar
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
@@ -20,7 +30,9 @@ import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.ValueEventListener
 import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
-import androidx.compose.ui.text.input.PasswordVisualTransformation
+import com.google.firebase.storage.FirebaseStorage
+
+import androidx.activity.compose.rememberLauncherForActivityResult
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -51,6 +63,7 @@ fun PerfilScreen(navController: NavController) {
 private fun ProfileContent(navController: NavController, modifier: Modifier = Modifier) {
     val auth = FirebaseAuth.getInstance()
     val database = Firebase.database.reference
+    val storage = FirebaseStorage.getInstance()
     val context = LocalContext.current
 
     val userId = auth.currentUser?.uid ?: run {
@@ -63,6 +76,7 @@ private fun ProfileContent(navController: NavController, modifier: Modifier = Mo
     var userBio by remember { mutableStateOf("") }
     var userInterests by remember { mutableStateOf("") }
     var userEmail by remember { mutableStateOf("") }
+    var userProfileImageUri by remember { mutableStateOf<Uri?>(null) }
     var newPassword by remember { mutableStateOf("") }
     var confirmPassword by remember { mutableStateOf("") }
     var isLoading by remember { mutableStateOf(true) }
@@ -78,6 +92,8 @@ private fun ProfileContent(navController: NavController, modifier: Modifier = Mo
                     userBio = snapshot.child("bio").getValue(String::class.java) ?: ""
                     userInterests = snapshot.child("interests").getValue(String::class.java) ?: ""
                     userEmail = snapshot.child("email").getValue(String::class.java) ?: ""
+                    val profileImage = snapshot.child("profileImage").getValue(String::class.java)
+                    userProfileImageUri = if (profileImage != null) Uri.parse(profileImage) else null
                 }
                 isLoading = false
             }
@@ -95,6 +111,23 @@ private fun ProfileContent(navController: NavController, modifier: Modifier = Mo
         }
     }
 
+    val imagePickerLauncher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
+        uri?.let {
+            userProfileImageUri = it
+            // Subir la imagen a Firebase Storage y obtener la URL
+            val storageRef = storage.reference.child("profile_images/${userId}.jpg")
+            storageRef.putFile(uri)
+                .addOnSuccessListener {
+                    storageRef.downloadUrl.addOnSuccessListener { downloadUrl ->
+                        database.child("users").child(userId).child("profileImage").setValue(downloadUrl.toString())
+                    }
+                }
+                .addOnFailureListener {
+                    Toast.makeText(context, "Error al subir la imagen", Toast.LENGTH_SHORT).show()
+                }
+        }
+    }
+
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -104,6 +137,20 @@ private fun ProfileContent(navController: NavController, modifier: Modifier = Mo
         if (isLoading) {
             CircularProgressIndicator(modifier = Modifier.padding(32.dp))
         } else {
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Foto de perfil
+            Image(
+                painter = rememberImagePainter(
+                    userProfileImageUri ?: R.drawable.default_profile_image // Imagen predeterminada
+                ),
+                contentDescription = "Foto de perfil",
+                modifier = Modifier
+                    .size(120.dp)
+                    .clip(CircleShape)
+                    .clickable { imagePickerLauncher.launch("image/*") }
+            )
+
             Spacer(modifier = Modifier.height(16.dp))
 
             // Nombre de usuario

@@ -1,7 +1,6 @@
 package com.example.faunafinder.navigation
 
 import androidx.compose.runtime.Composable
-import androidx.navigation.NavHost
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -12,6 +11,7 @@ import com.example.faunafinder.ui.screens.LoginScreen
 import com.example.faunafinder.ui.screens.RegisterScreen
 import com.example.faunafinder.ui.screens.CreatePostScreen
 import com.example.faunafinder.ui.screens.FeedScreen
+import com.example.faunafinder.ui.map.LocationScreen
 
 sealed class Screen(val route: String) {
     object Home : Screen("home")
@@ -21,6 +21,7 @@ sealed class Screen(val route: String) {
     object CreatePost : Screen("create_post")
     object Perfil : Screen("perfil")
     object Notifications : Screen("notifications")
+    object Location : Screen("Location")
 
 }
 
@@ -36,5 +37,7 @@ fun AppNavigation() {
         composable(Screen.CreatePost.route) { CreatePostScreen(navController) }
         composable(Screen.Perfil.route) { PerfilScreen(navController) }
         composable(Screen.Notifications.route) { NotificationsScreen()}
+        composable(Screen.Location.route) { LocationScreen(navController) }
+
     }
 }
