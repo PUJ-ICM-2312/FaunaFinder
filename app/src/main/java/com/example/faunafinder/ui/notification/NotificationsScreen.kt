@@ -1,4 +1,4 @@
-package com.example.faunafinder.ui.feed
+package com.example.faunafinder.ui.notification
 
 
 import androidx.compose.foundation.layout.*

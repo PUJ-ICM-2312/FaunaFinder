@@ -1,6 +1,5 @@
 package com.example.faunafinder.ui.post.components
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -10,17 +9,11 @@ import coil.compose.AsyncImage
 import com.example.faunafinder.ui.post.model.Post
 
 @Composable
-fun PostItem(
-    post: Post,
-    onClick: () -> Unit,
-    onCommentsClick: () -> Unit,
-    modifier: Modifier = Modifier
-) {
+fun PostCard(post: Post, onCommentsClick: () -> Unit, modifier: Modifier = Modifier) {
     Card(
         modifier = modifier
             .fillMaxWidth()
             .padding(8.dp)
-            .clickable { onClick() }
     ) {
         Column(modifier = Modifier.padding(12.dp)) {
             Text(text = post.content, style = MaterialTheme.typography.bodyLarge)

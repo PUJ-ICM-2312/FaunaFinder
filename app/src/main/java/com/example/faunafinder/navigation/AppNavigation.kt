@@ -1,16 +1,14 @@
 package com.example.faunafinder.navigation
 
 import androidx.compose.runtime.Composable
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.example.faunafinder.ui.feed.NotificationsScreen
+import androidx.navigation.navArgument
+import com.example.faunafinder.ui.notification.NotificationsScreen
 import com.example.faunafinder.ui.perfil.PerfilScreen
-import com.example.faunafinder.ui.screens.HomeScreen
-import com.example.faunafinder.ui.screens.LoginScreen
-import com.example.faunafinder.ui.screens.RegisterScreen
-import com.example.faunafinder.ui.screens.CreatePostScreen
-import com.example.faunafinder.ui.screens.FeedScreen
+import com.example.faunafinder.ui.screens.*
 import com.example.faunafinder.ui.map.LocationScreen
 
 sealed class Screen(val route: String) {
@@ -22,7 +20,7 @@ sealed class Screen(val route: String) {
     object Perfil : Screen("perfil")
     object Notifications : Screen("notifications")
     object Location : Screen("Location")
-
+    object PostDetail : Screen("post_detail")
 }
 
 @Composable
@@ -36,8 +34,16 @@ fun AppNavigation() {
         composable(Screen.Feed.route) { FeedScreen(navController) }
         composable(Screen.CreatePost.route) { CreatePostScreen(navController) }
         composable(Screen.Perfil.route) { PerfilScreen(navController) }
-        composable(Screen.Notifications.route) { NotificationsScreen()}
+        composable(Screen.Notifications.route) { NotificationsScreen() }
         composable(Screen.Location.route) { LocationScreen(navController) }
 
+        // Post detail con parámetro postId
+        composable(
+            route = Screen.PostDetail.route + "/{postId}",
+            arguments = listOf(navArgument("postId") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val postId = backStackEntry.arguments?.getString("postId") ?: ""
+            PostDetailScreen(postId = postId, onBack = { navController.popBackStack() })
+        }
     }
 }
