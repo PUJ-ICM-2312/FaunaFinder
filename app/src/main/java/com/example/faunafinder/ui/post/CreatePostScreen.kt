@@ -17,6 +17,8 @@ import androidx.core.content.ContextCompat
 import coil.compose.AsyncImage
 import com.example.faunafinder.ui.post.model.Post
 import com.example.faunafinder.ui.post.repository.PostsRepository
+import com.google.android.gms.common.ConnectionResult
+import com.google.android.gms.common.GoogleApiAvailability
 import com.google.android.gms.location.LocationServices
 import com.google.firebase.storage.FirebaseStorage
 import java.io.File
@@ -36,41 +38,23 @@ fun CreatePostScreen(navController: androidx.navigation.NavController) {
     var isLoading by remember { mutableStateOf(false) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
 
-    val locationPermissionLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.RequestPermission(),
-        onResult = { granted ->
-            if (granted) {
-                getCurrentLocation(
-                    context = context,
-                    onSuccess = { latLng ->
-                        latitude = latLng.first
-                        longitude = latLng.second
-                    },
-                    onFailure = { message ->
-                        errorMessage = message
-                    }
-                )
-            } else {
-                errorMessage = "Permiso de ubicación denegado"
-            }
+    // Manejo permisos y ubicación con helper
+    RequestLocationPermissionAndGetLocation { result ->
+        result.onSuccess { latLng ->
+            latitude = latLng.first
+            longitude = latLng.second
+            errorMessage = null
+        }.onFailure { error ->
+            errorMessage = error.message
         }
-    )
+    }
 
+    // Lanzadores para selección y captura de imagen
     val imagePickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
     ) { uri: Uri? ->
         uri?.let {
             imageUri = it
-            getCurrentLocation(
-                context = context,
-                onSuccess = { latLng ->
-                    latitude = latLng.first
-                    longitude = latLng.second
-                },
-                onFailure = { message ->
-                    errorMessage = message
-                }
-            )
         }
     }
 
@@ -91,16 +75,6 @@ fun CreatePostScreen(navController: androidx.navigation.NavController) {
         if (success) {
             cameraImageUri.value?.let { uri ->
                 imageUri = uri
-                getCurrentLocation(
-                    context = context,
-                    onSuccess = { latLng ->
-                        latitude = latLng.first
-                        longitude = latLng.second
-                    },
-                    onFailure = { message ->
-                        errorMessage = message
-                    }
-                )
             }
         } else {
             errorMessage = "No se tomó la foto"
@@ -117,19 +91,6 @@ fun CreatePostScreen(navController: androidx.navigation.NavController) {
                 onSuccess(url.toString())
             }.addOnFailureListener { e -> onFailure(e) }
         }.addOnFailureListener { e -> onFailure(e) }
-    }
-
-    LaunchedEffect(Unit) {
-        getCurrentLocation(
-            context = context,
-            onSuccess = { latLng ->
-                latitude = latLng.first
-                longitude = latLng.second
-            },
-            onFailure = { message ->
-                errorMessage = message
-            }
-        )
     }
 
     Column(modifier = Modifier.padding(16.dp)) {
@@ -170,7 +131,9 @@ fun CreatePostScreen(navController: androidx.navigation.NavController) {
             AsyncImage(
                 model = uri,
                 contentDescription = "Imagen seleccionada o tomada",
-                modifier = Modifier.fillMaxWidth().height(200.dp)
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(200.dp)
             )
         }
 
@@ -241,24 +204,75 @@ fun CreatePostScreen(navController: androidx.navigation.NavController) {
     }
 }
 
-@SuppressLint("MissingPermission")
+@Composable
+fun RequestLocationPermissionAndGetLocation(
+    onLocationResult: (Result<Pair<Double, Double>>) -> Unit
+) {
+    val context = LocalContext.current
+    var hasLocationPermission by remember {
+        mutableStateOf(
+            ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED &&
+                    ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED
+        )
+    }
+
+    val permissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestMultiplePermissions(),
+        onResult = { permissions ->
+            val granted = permissions[Manifest.permission.ACCESS_FINE_LOCATION] == true ||
+                    permissions[Manifest.permission.ACCESS_COARSE_LOCATION] == true
+            hasLocationPermission = granted
+            if (granted) {
+                getCurrentLocation(context, onLocationResult)
+            } else {
+                onLocationResult(Result.failure(Exception("Permiso de ubicación denegado")))
+            }
+        }
+    )
+
+    LaunchedEffect(hasLocationPermission) {
+        if (hasLocationPermission) {
+            getCurrentLocation(context, onLocationResult)
+        } else {
+            permissionLauncher.launch(
+                arrayOf(
+                    Manifest.permission.ACCESS_FINE_LOCATION,
+                    Manifest.permission.ACCESS_COARSE_LOCATION
+                )
+            )
+        }
+    }
+}
+
 private fun getCurrentLocation(
     context: Context,
-    onSuccess: (Pair<Double, Double>) -> Unit,
-    onFailure: (String) -> Unit = { _ -> }
+    onLocationResult: (Result<Pair<Double, Double>>) -> Unit
 ) {
-    val fusedLocationClient = LocationServices.getFusedLocationProviderClient(context)
-    if (ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-        fusedLocationClient.lastLocation.addOnSuccessListener { location ->
-            if (location != null) {
-                onSuccess(Pair(location.latitude, location.longitude))
-            } else {
-                onFailure("No se pudo obtener la ubicación")
-            }
-        }.addOnFailureListener { e ->
-            onFailure("Error al obtener ubicación: ${e.message}")
-        }
-    } else {
-        onFailure("Permiso de ubicación no concedido")
+    val googleApiAvailability = GoogleApiAvailability.getInstance()
+    val resultCode = googleApiAvailability.isGooglePlayServicesAvailable(context)
+    if (resultCode != ConnectionResult.SUCCESS) {
+        onLocationResult(Result.failure(Exception("Google Play Services no disponible o no válido")))
+        return
     }
+
+    val fusedLocationClient = LocationServices.getFusedLocationProviderClient(context)
+
+    if (ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
+        ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
+    ) {
+        onLocationResult(Result.failure(Exception("Permiso de ubicación no concedido")))
+        return
+    }
+
+    fusedLocationClient.lastLocation
+        .addOnSuccessListener { location ->
+            if (location != null) {
+                onLocationResult(Result.success(Pair(location.latitude, location.longitude)))
+            } else {
+                onLocationResult(Result.failure(Exception("No se pudo obtener la ubicación")))
+            }
+        }
+        .addOnFailureListener { e ->
+            onLocationResult(Result.failure(Exception("Error al obtener ubicación: ${e.message}")))
+        }
 }

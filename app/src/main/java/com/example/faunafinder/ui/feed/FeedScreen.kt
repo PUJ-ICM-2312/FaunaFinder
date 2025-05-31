@@ -17,51 +17,42 @@ import com.example.faunafinder.navigation.BottomNavigationBar
 import androidx.navigation.NavType
 import androidx.navigation.compose.*
 
+import androidx.compose.ui.Alignment
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FeedScreen(navController: NavController) {
     var posts by remember { mutableStateOf(listOf<Post>()) }
-    var isLoading by remember { mutableStateOf(true) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
+    var isLoading by remember { mutableStateOf(true) }
 
     LaunchedEffect(Unit) {
-        PostsRepository.getPosts(onSuccess = {
-            posts = it
-            isLoading = false
-        }, onFailure = {
-            errorMessage = "Error cargando posts: ${it.message}"
-            isLoading = false
-        })
+        PostsRepository.listenPosts(
+            onChange = {
+                posts = it
+                isLoading = false
+            },
+            onError = {
+                errorMessage = it.message
+                isLoading = false
+            }
+        )
     }
 
     Scaffold(
-        topBar = {
-            SmallTopAppBar(title = { Text("Feed") })
-        },
-        bottomBar = {
-            BottomNavigationBar(navController = navController)
-        },
+        topBar = { SmallTopAppBar(title = { Text("Feed") }) },
+        bottomBar = { BottomNavigationBar(navController) },
         content = { padding ->
             Box(modifier = Modifier.padding(padding).fillMaxSize()) {
-                if (isLoading) {
-                    CircularProgressIndicator(modifier = Modifier.align(androidx.compose.ui.Alignment.Center))
-                } else if (errorMessage != null) {
-                    Text(
-                        text = errorMessage ?: "",
-                        color = MaterialTheme.colorScheme.error,
-                        modifier = Modifier.align(androidx.compose.ui.Alignment.Center)
-                    )
-                } else {
-                    LazyColumn {
+                when {
+                    isLoading -> CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+                    errorMessage != null -> Text(errorMessage ?: "", color = MaterialTheme.colorScheme.error, modifier = Modifier.align(Alignment.Center))
+                    else -> LazyColumn {
                         items(posts) { post ->
-                            PostItem(
-                                post = post,
-                                onClick = {  },
-                                onCommentsClick = {
-                                    navController.navigate(Screen.PostDetail.route + "/${post.id}")
-                                }
-                            )
+                            PostItem(post = post, onClick = {}, onCommentsClick = {
+                                navController.navigate(Screen.PostDetail.route + "/${post.id}")
+                            })
                         }
                     }
                 }

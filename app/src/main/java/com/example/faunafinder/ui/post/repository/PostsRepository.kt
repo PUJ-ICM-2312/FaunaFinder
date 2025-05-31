@@ -1,49 +1,59 @@
 package com.example.faunafinder.ui.post.repository
 
 import com.example.faunafinder.ui.post.model.Post
-import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.Query
-import com.google.firebase.firestore.SetOptions
+import com.google.firebase.database.*
 
 object PostsRepository {
-    private val db = FirebaseFirestore.getInstance()
-    private val postsCollection = db.collection("posts")
+    private val db = FirebaseDatabase.getInstance().reference.child("posts")
 
-    // Agregar nuevo post
     fun addPost(post: Post, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) {
-        val newDoc = postsCollection.document()
-        val postWithId = post.copy(id = newDoc.id)
-        newDoc.set(postWithId)
+        val newPostRef = db.push()
+        val postWithId = post.copy(id = newPostRef.key ?: "")
+        newPostRef.setValue(postWithId)
             .addOnSuccessListener { onSuccess() }
             .addOnFailureListener { onFailure(it) }
     }
 
-    // Obtener lista de posts ordenada por fecha descendente
-    fun getPosts(onSuccess: (List<Post>) -> Unit, onFailure: (Exception) -> Unit) {
-        postsCollection.orderBy("timestamp", Query.Direction.DESCENDING)
-            .get()
-            .addOnSuccessListener { snapshot ->
-                val posts = snapshot.toObjects(Post::class.java)
-                onSuccess(posts)
+    // Escuchar posts en tiempo real
+    fun listenPosts(onChange: (List<Post>) -> Unit, onError: (DatabaseError) -> Unit) {
+        val listener = object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                val posts = mutableListOf<Post>()
+                for (child in snapshot.children) {
+                    val post = child.getValue(Post::class.java)
+                    if (post != null) posts.add(post)
+                }
+                posts.sortByDescending { it.timestamp }
+                onChange(posts)
             }
-            .addOnFailureListener { onFailure(it) }
+            override fun onCancelled(error: DatabaseError) {
+                onError(error)
+            }
+        }
+        db.addValueEventListener(listener)
     }
 
-    // Incrementar contador de likes atomícamente
     fun incrementLikesCount(postId: String, increment: Int = 1) {
-        val postRef = postsCollection.document(postId)
-        val update = hashMapOf<String, Any>(
-            "likesCount" to com.google.firebase.firestore.FieldValue.increment(increment.toLong())
-        )
-        postRef.set(update, SetOptions.merge())
+        val postLikesRef = db.child(postId).child("likesCount")
+        postLikesRef.runTransaction(object : Transaction.Handler {
+            override fun doTransaction(currentData: MutableData): Transaction.Result {
+                val currentValue = currentData.getValue(Int::class.java) ?: 0
+                currentData.value = currentValue + increment
+                return Transaction.success(currentData)
+            }
+            override fun onComplete(error: DatabaseError?, committed: Boolean, snapshot: DataSnapshot?) {}
+        })
     }
 
-    // Incrementar contador de comentarios atomícamente
     fun incrementCommentsCount(postId: String, increment: Int = 1) {
-        val postRef = postsCollection.document(postId)
-        val update = hashMapOf<String, Any>(
-            "commentsCount" to com.google.firebase.firestore.FieldValue.increment(increment.toLong())
-        )
-        postRef.set(update, SetOptions.merge())
+        val postCommentsRef = db.child(postId).child("commentsCount")
+        postCommentsRef.runTransaction(object : Transaction.Handler {
+            override fun doTransaction(currentData: MutableData): Transaction.Result {
+                val currentValue = currentData.getValue(Int::class.java) ?: 0
+                currentData.value = currentValue + increment
+                return Transaction.success(currentData)
+            }
+            override fun onComplete(error: DatabaseError?, committed: Boolean, snapshot: DataSnapshot?) {}
+        })
     }
 }
