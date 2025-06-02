@@ -68,13 +68,15 @@ fun FeedScreen(navController: NavController) {
 
                             post.latitude?.let { lat ->
                                 val lng = post.longitude ?: 0.0
-                                val geoUri = Uri.parse("geo:$lat,$lng?q=$lat,$lng")
+                                //val geoUri = Uri.parse("geo:$lat,$lng?q=$lat,$lng")
 
                                 Text(
                                     text = "Ubicación: $lat, $lng (Ver en mapa)",
                                     color = Color(0xFF1E88E5),
                                     modifier = Modifier.clickable {
-                                        val intent = Intent(Intent.ACTION_VIEW, geoUri)
+                                        val directionsUri = Uri.parse("https://www.google.com/maps/dir/?api=1&destination=$lat,$lng&travelmode=walking")
+                                        val intent = Intent(Intent.ACTION_VIEW, directionsUri)
+
                                         intent.setPackage("com.google.android.apps.maps")
                                         context.startActivity(intent)
                                     }

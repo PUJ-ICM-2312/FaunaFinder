@@ -8,7 +8,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.faunafinder.R
 import com.example.faunafinder.navigation.Screen
@@ -28,12 +30,14 @@ fun HomeScreen(navController: NavController) {
 
         Spacer(modifier = Modifier.height(20.dp))
 
-        Button(onClick = { navController.navigate(Screen.Login.route) }) {
-            Text("Iniciar Sesión")
+        Button(onClick = { navController.navigate(Screen.Login.route) },
+               modifier = Modifier.width(220.dp).height(55.dp)
+            ) {
+            Text("Iniciar Sesión", fontSize = 18.sp)
         }
 
         TextButton(onClick = { navController.navigate(Screen.Register.route) }) {
-            Text("Registrarse")
+            Text("Registrarse", fontWeight = FontWeight.Bold, fontSize = 22.sp)
         }
     }
 }
