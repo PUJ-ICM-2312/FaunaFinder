@@ -7,5 +7,6 @@ data class LocalPost(
     val imageUri: Uri,
     val description: String,
     val latitude: Double?,
-    val longitude: Double?
+    val longitude: Double?,
+    val orientation: String? = null
 )
