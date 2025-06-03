@@ -14,19 +14,14 @@ object CommentRepository {
             .addOnFailureListener { onFailure(it) }
     }
 
-    // Escuchar comentarios para un post en tiempo real
     fun listenCommentsForPost(postId: String, onChange: (List<Comment>) -> Unit, onError: (DatabaseError) -> Unit) {
         val query = db.orderByChild("postId").equalTo(postId)
         val listener = object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
-                val comments = mutableListOf<Comment>()
-                for (child in snapshot.children) {
-                    val comment = child.getValue(Comment::class.java)
-                    if (comment != null) comments.add(comment)
-                }
-                comments.sortBy { it.timestamp }
+                val comments = snapshot.children.mapNotNull { it.getValue(Comment::class.java) }.sortedBy { it.timestamp }
                 onChange(comments)
             }
+
             override fun onCancelled(error: DatabaseError) {
                 onError(error)
             }

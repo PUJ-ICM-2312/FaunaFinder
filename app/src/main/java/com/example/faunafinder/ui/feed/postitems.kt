@@ -8,6 +8,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.example.faunafinder.ui.post.model.Post
+import com.example.faunafinder.ui.post.components.LikeButton
 
 @Composable
 fun PostItem(
@@ -23,30 +24,20 @@ fun PostItem(
             .clickable { onClick() }
     ) {
         Column(modifier = Modifier.padding(12.dp)) {
-            Text(text = post.content, style = MaterialTheme.typography.bodyLarge)
+            Text(post.content)
+            Spacer(modifier = Modifier.height(8.dp))
+            AsyncImage(model = post.imageUrl, contentDescription = null)
             Spacer(modifier = Modifier.height(8.dp))
 
-            post.imageUrl?.let { url ->
-                AsyncImage(
-                    model = url,
-                    contentDescription = "Imagen del post",
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(200.dp)
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-            }
+            Text("Ubicación: ${post.latitude}, ${post.longitude}")
 
-            Text(text = "Ubicación: lat=${post.latitude}, lon=${post.longitude}", style = MaterialTheme.typography.bodySmall)
             Spacer(modifier = Modifier.height(8.dp))
-
             LikeButton(postId = post.id, initialLikesCount = post.likesCount)
-
-            Spacer(modifier = Modifier.height(8.dp))
 
             TextButton(onClick = onCommentsClick) {
                 Text("Ver Comentarios (${post.commentsCount})")
             }
         }
+
     }
 }

@@ -1,59 +1,47 @@
 package com.example.faunafinder.ui.post.repository
 
 import com.example.faunafinder.ui.post.model.Post
-import com.google.firebase.database.*
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.FieldValue
+
 
 object PostsRepository {
-    private val db = FirebaseDatabase.getInstance().reference.child("posts")
+    private val db = FirebaseFirestore.getInstance()
+    private val postsCollection = db.collection("posts")
 
     fun addPost(post: Post, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) {
-        val newPostRef = db.push()
-        val postWithId = post.copy(id = newPostRef.key ?: "")
-        newPostRef.setValue(postWithId)
+        val newDoc = postsCollection.document()
+        val postWithId = post.copy(id = newDoc.id)
+        newDoc.set(postWithId)
             .addOnSuccessListener { onSuccess() }
             .addOnFailureListener { onFailure(it) }
     }
 
-    // Escuchar posts en tiempo real
-    fun listenPosts(onChange: (List<Post>) -> Unit, onError: (DatabaseError) -> Unit) {
-        val listener = object : ValueEventListener {
-            override fun onDataChange(snapshot: DataSnapshot) {
-                val posts = mutableListOf<Post>()
-                for (child in snapshot.children) {
-                    val post = child.getValue(Post::class.java)
-                    if (post != null) posts.add(post)
-                }
-                posts.sortByDescending { it.timestamp }
-                onChange(posts)
-            }
-            override fun onCancelled(error: DatabaseError) {
+    fun listenPosts(onChange: (List<Post>) -> Unit, onError: (Exception) -> Unit) {
+        postsCollection.addSnapshotListener { snapshot, error ->
+            if (error != null) {
                 onError(error)
+                return@addSnapshotListener
             }
+            val posts = snapshot?.documents?.mapNotNull { it.toObject(Post::class.java) } ?: emptyList()
+            onChange(posts.sortedByDescending { it.timestamp })
         }
-        db.addValueEventListener(listener)
     }
 
-    fun incrementLikesCount(postId: String, increment: Int = 1) {
-        val postLikesRef = db.child(postId).child("likesCount")
-        postLikesRef.runTransaction(object : Transaction.Handler {
-            override fun doTransaction(currentData: MutableData): Transaction.Result {
-                val currentValue = currentData.getValue(Int::class.java) ?: 0
-                currentData.value = currentValue + increment
-                return Transaction.success(currentData)
-            }
-            override fun onComplete(error: DatabaseError?, committed: Boolean, snapshot: DataSnapshot?) {}
-        })
+    fun incrementCommentsCount(postId: String) {
+        val db = FirebaseFirestore.getInstance()
+        val postRef = db.collection("posts").document(postId)
+        postRef.update("commentsCount", FieldValue.increment(1))
     }
 
-    fun incrementCommentsCount(postId: String, increment: Int = 1) {
-        val postCommentsRef = db.child(postId).child("commentsCount")
-        postCommentsRef.runTransaction(object : Transaction.Handler {
-            override fun doTransaction(currentData: MutableData): Transaction.Result {
-                val currentValue = currentData.getValue(Int::class.java) ?: 0
-                currentData.value = currentValue + increment
-                return Transaction.success(currentData)
+    fun getPostById(postId: String, onSuccess: (Post?) -> Unit, onFailure: (Exception) -> Unit) {
+        postsCollection.document(postId).get()
+            .addOnSuccessListener { snapshot ->
+                val post = snapshot.toObject(Post::class.java)
+                onSuccess(post)
             }
-            override fun onComplete(error: DatabaseError?, committed: Boolean, snapshot: DataSnapshot?) {}
-        })
+            .addOnFailureListener { onFailure(it) }
     }
+
+
 }

@@ -16,8 +16,7 @@ object LikeRepository {
     }
 
     fun removeLike(likeId: String, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) {
-        likesCollection.document(likeId)
-            .delete()
+        likesCollection.document(likeId).delete()
             .addOnSuccessListener { onSuccess() }
             .addOnFailureListener { onFailure(it) }
     }
@@ -32,12 +31,5 @@ object LikeRepository {
             .addOnFailureListener { onFailure(it) }
     }
 
-    fun getLikesCountForPost(postId: String, onSuccess: (Int) -> Unit, onFailure: (Exception) -> Unit) {
-        likesCollection.whereEqualTo("postId", postId)
-            .get()
-            .addOnSuccessListener { snapshot ->
-                onSuccess(snapshot.size())
-            }
-            .addOnFailureListener { onFailure(it) }
-    }
+
 }
