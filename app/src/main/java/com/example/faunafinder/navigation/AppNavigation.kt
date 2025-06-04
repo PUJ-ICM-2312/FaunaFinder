@@ -6,7 +6,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import com.example.faunafinder.ui.notification.NotificationsScreen
+import com.example.faunafinder.ui.notification.NotificationScreen
 import com.example.faunafinder.ui.perfil.PerfilScreen
 import com.example.faunafinder.ui.screens.*
 import com.example.faunafinder.ui.map.LocationScreen
@@ -34,7 +34,7 @@ fun AppNavigation() {
         composable(Screen.Feed.route) { FeedScreen(navController) }
         composable(Screen.CreatePost.route) { CreatePostScreen(navController) }
         composable(Screen.Perfil.route) { PerfilScreen(navController) }
-        composable(Screen.Notifications.route) { NotificationsScreen() }
+        composable(Screen.Notifications.route) {  NotificationScreen(navController) }
         composable(Screen.Location.route) { LocationScreen(navController) }
 
         // Post detail con parámetro postId
