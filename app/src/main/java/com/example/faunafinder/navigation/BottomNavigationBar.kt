@@ -53,17 +53,6 @@ fun BottomNavigationBar(navController: NavController) {
             }
         )
 
-        NavigationBarItem(
-            selected = false,
-            onClick = { navController.navigate(Screen.Location.route) },
-            icon = {
-                Icon(
-                    imageVector = Icons.Filled.LocationOn,
-                    contentDescription = "Mi ubicación",
-                    tint = Color(0xFFFCB900)
-                )
-            }
-        )
 
         NavigationBarItem(
             selected = false,

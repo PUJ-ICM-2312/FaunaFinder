@@ -9,7 +9,7 @@ import androidx.navigation.navArgument
 import com.example.faunafinder.ui.notification.NotificationScreen
 import com.example.faunafinder.ui.perfil.PerfilScreen
 import com.example.faunafinder.ui.screens.*
-import com.example.faunafinder.ui.map.LocationScreen
+import com.example.faunafinder.ui.feed.*
 
 sealed class Screen(val route: String) {
     object Home : Screen("home")
@@ -19,7 +19,6 @@ sealed class Screen(val route: String) {
     object CreatePost : Screen("create_post")
     object Perfil : Screen("perfil")
     object Notifications : Screen("notifications")
-    object Location : Screen("Location")
     object PostDetail : Screen("post_detail")
 }
 
@@ -35,7 +34,6 @@ fun AppNavigation() {
         composable(Screen.CreatePost.route) { CreatePostScreen(navController) }
         composable(Screen.Perfil.route) { PerfilScreen(navController) }
         composable(Screen.Notifications.route) {  NotificationScreen(navController) }
-        composable(Screen.Location.route) { LocationScreen(navController) }
 
         // Post detail con parámetro postId
         composable(

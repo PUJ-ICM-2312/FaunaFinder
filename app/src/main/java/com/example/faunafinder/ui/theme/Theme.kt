@@ -23,7 +23,7 @@ private val DarkColorScheme = darkColorScheme(
 )
 
 private val LightColorScheme = lightColorScheme(
-    primary = VerdeLima,         // Botones
+    primary = VerdeLimaOscuro,         // Botones
     onPrimary = Negro,           // Texto en botones
     background = VerdeMentaClaro,// Fondo de pantalla
     onBackground = Negro,        // Texto sobre fondo

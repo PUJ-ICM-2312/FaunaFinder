@@ -1,6 +1,7 @@
 package com.example.faunafinder.ui.post.repository
 
 import com.example.faunafinder.ui.post.model.Like
+import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 
 object LikeRepository {
@@ -11,16 +12,31 @@ object LikeRepository {
         val newDoc = likesCollection.document()
         val likeWithId = like.copy(id = newDoc.id)
         newDoc.set(likeWithId)
-            .addOnSuccessListener { onSuccess() }
+            .addOnSuccessListener {
+                updateLikesCount(like.postId, 1)
+                onSuccess()
+            }
             .addOnFailureListener { onFailure(it) }
     }
 
     fun removeLike(likeId: String, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) {
-        likesCollection.document(likeId)
-            .delete()
-            .addOnSuccessListener { onSuccess() }
+        likesCollection.document(likeId).get()
+            .addOnSuccessListener { snapshot ->
+                val like = snapshot.toObject(Like::class.java)
+                if (like != null) {
+                    likesCollection.document(likeId).delete()
+                        .addOnSuccessListener {
+                            updateLikesCount(like.postId, -1)
+                            onSuccess()
+                        }
+                        .addOnFailureListener { onFailure(it) }
+                } else {
+                    onFailure(Exception("Like no encontrado"))
+                }
+            }
             .addOnFailureListener { onFailure(it) }
     }
+
 
     fun getUserLikeForPost(postId: String, userId: String, onSuccess: (Like?) -> Unit, onFailure: (Exception) -> Unit) {
         likesCollection.whereEqualTo("postId", postId).whereEqualTo("userId", userId)
@@ -40,4 +56,11 @@ object LikeRepository {
             }
             .addOnFailureListener { onFailure(it) }
     }
-}
+
+    private fun updateLikesCount(postId: String, increment: Long) {
+        val postRef = FirebaseFirestore.getInstance().collection("posts").document(postId)
+        postRef.update("likesCount", FieldValue.increment(increment))
+    }
+
+
+    }

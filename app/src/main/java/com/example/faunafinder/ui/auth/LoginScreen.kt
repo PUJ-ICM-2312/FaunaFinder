@@ -2,6 +2,8 @@ package com.example.faunafinder.ui.screens
 
 import android.widget.Toast
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Visibility
@@ -10,13 +12,19 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.faunafinder.navigation.Screen
 import com.google.firebase.auth.FirebaseAuth
+import com.example.faunafinder.ui.components.FloatingLabel
 
 @Composable
 fun LoginScreen(navController: NavController) {
@@ -26,6 +34,9 @@ fun LoginScreen(navController: NavController) {
     var isLoading by remember { mutableStateOf(false) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
     var passwordVisible by remember { mutableStateOf(false) }
+
+    val emailFocus = remember { mutableStateOf(false) }
+    val passwordFocus = remember { mutableStateOf(false) }
 
     val auth = FirebaseAuth.getInstance()
 
@@ -48,9 +59,14 @@ fun LoginScreen(navController: NavController) {
         OutlinedTextField(
             value = email,
             onValueChange = { email = it },
-            label = { Text("Correo", color = MaterialTheme.colorScheme.onSurface) },
+            label = {
+                FloatingLabel("Correo", isActive = emailFocus.value || email.isNotBlank())
+            },
             singleLine = true,
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .onFocusChanged { emailFocus.value = it.isFocused },
+            shape = RectangleShape,
             colors = OutlinedTextFieldDefaults.colors(
                 focusedContainerColor = MaterialTheme.colorScheme.surface,
                 unfocusedContainerColor = MaterialTheme.colorScheme.surface,
@@ -64,7 +80,9 @@ fun LoginScreen(navController: NavController) {
         OutlinedTextField(
             value = password,
             onValueChange = { password = it },
-            label = { Text("Contraseña", color = MaterialTheme.colorScheme.onSurface) },
+            label = {
+                FloatingLabel("Contraseña", isActive = passwordFocus.value || password.isNotBlank())
+            },
             singleLine = true,
             visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
             trailingIcon = {
@@ -79,7 +97,10 @@ fun LoginScreen(navController: NavController) {
                     )
                 }
             },
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .onFocusChanged { passwordFocus.value = it.isFocused },
+            shape = RectangleShape,
             colors = OutlinedTextFieldDefaults.colors(
                 focusedContainerColor = MaterialTheme.colorScheme.surface,
                 unfocusedContainerColor = MaterialTheme.colorScheme.surface,
@@ -121,7 +142,7 @@ fun LoginScreen(navController: NavController) {
                 contentColor = MaterialTheme.colorScheme.onPrimary
             )
         ) {
-            Text(if (isLoading) "Cargando..." else "Log in")
+            Text(if (isLoading) "Cargando..." else "Log in", fontWeight = FontWeight.Bold, fontSize = 20.sp)
         }
 
         errorMessage?.let {
@@ -137,7 +158,7 @@ fun LoginScreen(navController: NavController) {
                 contentColor = MaterialTheme.colorScheme.primary
             )
         ) {
-            Text("¿No tienes cuenta? Registrarse")
+            Text("¿No tienes cuenta? Registrarse", fontWeight = FontWeight.Bold, fontSize = 20.sp)
         }
     }
 }
