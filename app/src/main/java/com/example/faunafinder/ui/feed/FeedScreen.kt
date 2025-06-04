@@ -41,22 +41,53 @@ fun FeedScreen(navController: NavController) {
     }
 
     Scaffold(
-        topBar = { SmallTopAppBar(title = { Text("Feed") }) },
-        bottomBar = { BottomNavigationBar(navController) },
-        content = { padding ->
-            Box(modifier = Modifier.padding(padding).fillMaxSize()) {
-                when {
-                    isLoading -> CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
-                    errorMessage != null -> Text(errorMessage ?: "", color = MaterialTheme.colorScheme.error, modifier = Modifier.align(Alignment.Center))
-                    else -> LazyColumn {
-                        items(posts) { post ->
-                            PostItem(post = post, onClick = {}, onCommentsClick = {
-                                navController.navigate(Screen.PostDetail.route + "/${post.id}")
-                            })
+        topBar = {
+            SmallTopAppBar(
+                title = { Text("FaunaFeed", style = MaterialTheme.typography.titleLarge) }
+            )
+        },
+        bottomBar = {
+            BottomNavigationBar(navController)
+        }
+    ) { paddingValues ->
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+        ) {
+            when {
+                isLoading -> {
+                    CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+                }
+
+                errorMessage != null -> {
+                    Text(
+                        text = errorMessage ?: "Error desconocido",
+                        color = MaterialTheme.colorScheme.error,
+                        modifier = Modifier.align(Alignment.Center)
+                    )
+                }
+
+                else -> {
+                    LazyColumn(
+                        modifier = Modifier.fillMaxSize(),
+                        contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp),
+                        verticalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        items(posts, key = { it.id }) { post ->
+                            PostItem(
+                                post = post,
+                                modifier = Modifier
+                                    .fillMaxWidth(),
+                                onClick = {},
+                                onCommentsClick = {
+                                    navController.navigate(Screen.PostDetail.route + "/${post.id}")
+                                }
+                            )
                         }
                     }
                 }
             }
         }
-    )
+    }
 }

@@ -9,5 +9,6 @@ data class Post(
     val timestamp: Long = 0L,
     val likesCount: Int = 0,
     val commentsCount: Int = 0
+
 )
 

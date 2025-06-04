@@ -14,6 +14,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
+import androidx.core.content.FileProvider
 import coil.compose.AsyncImage
 import com.example.faunafinder.ui.post.model.Post
 import com.example.faunafinder.ui.post.repository.PostsRepository
@@ -61,10 +62,16 @@ fun CreatePostScreen(navController: androidx.navigation.NavController) {
     val cameraImageUri = remember { mutableStateOf<Uri?>(null) }
 
     fun createImageUri(context: Context): Uri {
-        val imageFile = File(context.cacheDir, "camera_photo_${UUID.randomUUID()}.jpg")
-        return androidx.core.content.FileProvider.getUriForFile(
+        val imagesDir = File(context.cacheDir, "images")
+        if (!imagesDir.exists()) {
+            imagesDir.mkdirs() // Crea el directorio si no existe
+        }
+
+        val imageFile = File(imagesDir, "camera_photo_${UUID.randomUUID()}.jpg")
+
+        return FileProvider.getUriForFile(
             context,
-            context.packageName + ".fileprovider",
+            "com.example.faunafinder.fileprovider",
             imageFile
         )
     }
